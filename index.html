@@ -1,21 +1,3 @@
-<!--
-The helpers script introduces a JavaScript object named "helpers", which contains three functions.
-
-helpers.fetchNewMessages(callback)
-This goes to the server to fetch new messages your client hasn't displayed yet. When it has retrieved them, it passes them to the callback you provided.
-
-helpers.renderMessage(messageText)
-This takes the text of a message, transforms it into html, and renders that html to the screen.
-Note: the function searches the page for a node with the class "messages", and puts results in there. If there isn't one already, it will be created for you.
-
-helpers.sendMessage(messageText)
-This takes a string and sends it to the chat server
-
-Note: you don't need to handle user input, you can just send messages via the console.
-If you don't have rendering working yet, You check if your call worked by looking in the example client
-Last, you'll want to set up polling of the helpers.fetchNewMessages() function, using setInterval().
--->
-
 <html>
 <head>
 <title>Code Class Chat</title>
