@@ -19,71 +19,137 @@ Last, you'll want to set up polling of the helpers.fetchNewMessages() function, 
 <html>
 <head>
 <title>Code Class Chat</title>
+<link href='http://fonts.googleapis.com/css?family=Codystar|Special+Elite' rel='stylesheet' type='text/css'>
+<style>
+h1 {
+	font-family: 'Codystar', cursive;
+	text-align: center;
+	margin-top: 1%;
+}
+
+ul {
+	list-style-type: none;
+	padding-left: 0;
+	margin-left: 0;
+}
+
+li {
+	background: url(chat.png) left center no-repeat;
+	margin: .1rem .1rem;
+	padding: .5rem 0 0 33px;
+	font-size: 14px;
+}
+
+.typewriter {
+	font-family: 'Special Elite', cursive;
+}
+
+#form {
+	width: 70%;
+	margin: 0 auto;
+}
+
+#message {
+	width: 100%;
+}
+
+#msgtext {
+	width: 70%;
+	height: 80%;
+	margin: 0 auto;
+	overflow-y: scroll;
+}
+
+</style>
+
 </head>
 <body>
 
 <h1>Code Class Chat</h1>
 
-<form id="form" style="width:70%;margin:0 auto;">
-	<label>Type your message here:</label>
-		<input id="message" type="text" style="width:100%">
+<form id="form">
+	<label class="typewriter">Type your message here and hit 'Enter' to send:</label>
+		<input id="message" type="text">
 </form>
 
-<div style="width:70%;margin:0 auto;height:300px;overflow-y:scroll;">
-	<ul class="messages chatroom"></ul>
+<div id="msgtext">
+	<ul class="messages"></ul>
 </div>
 
-<script src="jquery-1.9.1.min.js"></script>
-<!-- <script src="http://codeclasschat.herokuapp.com/helpers.js"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
 </body>
 
 <script>
 
-function render(messageText){
-	helpers.renderMessage(messageText);	
-}
+// When the form gets submitted...
+$('#form').submit( function() {
+	console.log("submitted");
 
+	// Get the input from the form
+	var message = $('#message').val();
+	console.log(message);
+
+	$.ajax("http://codeclasschat.herokuapp.com/messages/create", {
+		crossDomain: true,
+		dataType: "jsonp",
+		data: {text: message},
+	    success: function (success){
+	    	console.log(success);
+		   	$('input').val(''); 	
+	    },
+	    error: function() {
+	    	console.log("ajax form submit error");
+	    }
+	});
+	// Don't refresh
+	return false;
+});
+
+// Display the most recent message
 function fetch() {
 	console.log("fetch() was called");
-	// helpers.fetchNewMessages(render)
-	$.ajax( "http://codeclasschat.herokuapp.com/messages.jsonp?callback=?", {
-		type: 'GET',
+	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
 		crossDomain: true,
-		datatype: "jsonp",
-		success: function(success){
+		dataType: "jsonp",
+		success: function(success) {
+			console.log("successfully fetched");
 
-			console.log(success);
-
-			// helpers.renderMessage(success);
+			// Since the array does not discern between messages you have already fetched and displayed, simply display the most recent message
+			var length = success.messages.length - 1;
+			$('.messages').prepend('<li class="typewriter">' + success.messages[length].text + '</li>');
 		},
 		error: function() {
-			
-			console.log("fetch() error");
+			console.log("fetch unsuccessful");
 		}
 	});
 }
 
-setInterval(fetch,15000);
-
-// When the form gets submitted...
-$('#form').submit( function() {
-
-	// Get the input from the form
-	var message = $('#message').val();
-
-	// 'GET' server call
-	$.ajax("http://codeclasschat.herokuapp.com/messages/create", {
+// Grab the most recent messages while the page loads
+function firstfetch() {
+	console.log("fetch() was called");
+	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
 		crossDomain: true,
 		dataType: "jsonp",
-	    success: function (success){
-	    	console.log(success);
-		   	$('input').val(''); 	
-	    }
-	});
+		success: function(success) {
+			console.log("successfully fetched");
 
-	// Don't refresh
-	return false;
-});
+			var length = success.messages.length;
+			for (i = 0; i < length; i++ ) {
+				$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
+			}
+		},
+		error: function() {
+			console.log("fetch unsuccessful");
+		}
+	});
+}
+
+
+window.onload = firstfetch;
+setInterval(fetch,15000);
+
+
 
 </script>
 </html>
