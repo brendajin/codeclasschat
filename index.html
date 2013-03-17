@@ -64,6 +64,9 @@ li {
 
 <script>
 
+var msgs1 = [];
+
+
 // When the form gets submitted...
 $('#form').submit( function() {
 	console.log("submitted");
@@ -88,48 +91,62 @@ $('#form').submit( function() {
 	return false;
 });
 
-// Display the most recent message
+// Compare two arrays and chuck the messages that have already been displayed.
 function fetch() {
 	console.log("fetch() was called");
 	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
 		crossDomain: true,
 		dataType: "jsonp",
 		success: function(success) {
-			console.log("successfully fetched");
+			console.log("fetch() success");
 
-			// Since the array does not discern between messages you have already fetched and displayed, simply display the most recent message
-			var length = success.messages.length - 1;
-			$('.messages').prepend('<li class="typewriter">' + success.messages[length].text + '</li>');
+			for (i = 0; i < success.messages.length; i++ ) {
+				var newtime = success.messages[i].time;
+				var oldtime = msgs1[msgs1.length-1].time;
+				console.log(newtime);
+				var timedif = success.messages[0].time - msgs1[0];
+				if (newtime > oldtime && msgs1.length > 100) {
+					msgs1.push(success.messages[i]);
+					$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
+					msgs1.splice(0);
+				}
+				else if (newtime > oldtime) {
+					msgs1.push(success.messages[i]);
+					$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
+				}
+			}		
 		},
 		error: function() {
-			console.log("fetch unsuccessful");
+			console.log("fetch() error");
 		}
 	});
 }
 
-// Grab the most recent messages while the page loads
+// Call and display the most recent messages when the page loads
 function firstfetch() {
 	console.log("fetch() was called");
 	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
 		crossDomain: true,
 		dataType: "jsonp",
 		success: function(success) {
-			console.log("successfully fetched");
-
+			console.log("firstfetch() success");
 			var length = success.messages.length;
-			for (i = 0; i < length; i++ ) {
+
+			for (i = 0; i < success.messages.length; i++ ) {	
+				msgs1.push(success.messages[i]);
+				console.log("successfully added " + i + " to msgs1");
 				$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
 			}
 		},
 		error: function() {
-			console.log("fetch unsuccessful");
+			console.log("firstfetch() error");
 		}
 	});
 }
 
 
 window.onload = firstfetch;
-setInterval(fetch,15000);
+setInterval(fetch,1000);
 
 
 
