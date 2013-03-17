@@ -64,7 +64,7 @@ li {
 
 <script>
 
-var msgs1 = [];
+var msgs = [];
 
 
 // When the form gets submitted...
@@ -91,7 +91,7 @@ $('#form').submit( function() {
 	return false;
 });
 
-// Compare two arrays and chuck the messages that have already been displayed.
+// fetch new messages
 function fetch() {
 	console.log("fetch() was called");
 	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
@@ -99,20 +99,19 @@ function fetch() {
 		dataType: "jsonp",
 		success: function(success) {
 			console.log("fetch() success");
-
+			
+			// loop through retrieved messages
 			for (i = 0; i < success.messages.length; i++ ) {
 				var newtime = success.messages[i].time;
-				var oldtime = msgs1[msgs1.length-1].time;
+				var oldtime = msgs[msgs.length-1].time;
 				console.log(newtime);
-				var timedif = success.messages[0].time - msgs1[0];
-				if (newtime > oldtime && msgs1.length > 100) {
-					msgs1.push(success.messages[i]);
+			
+				// check if the new message is newer than the last old message
+				if (newtime > oldtime) {
+					msgs.push(success.messages[i]);
 					$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
-					msgs1.splice(0);
-				}
-				else if (newtime > oldtime) {
-					msgs1.push(success.messages[i]);
-					$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
+					// if a new message was added, let's keep the array small
+					msgs.shift();
 				}
 			}		
 		},
@@ -133,8 +132,8 @@ function firstfetch() {
 			var length = success.messages.length;
 
 			for (i = 0; i < success.messages.length; i++ ) {	
-				msgs1.push(success.messages[i]);
-				console.log("successfully added " + i + " to msgs1");
+				msgs.push(success.messages[i]);
+				console.log("successfully added " + i + " to msgs");
 				$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
 			}
 		},
@@ -143,7 +142,6 @@ function firstfetch() {
 		}
 	});
 }
-
 
 window.onload = firstfetch;
 setInterval(fetch,1000);
