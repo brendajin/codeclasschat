@@ -64,8 +64,8 @@ li {
 
 <script>
 
-var msgs = [];
-
+//start counting the time
+var time = 0;
 
 // When the form gets submitted...
 $('#form').submit( function() {
@@ -91,7 +91,7 @@ $('#form').submit( function() {
 	return false;
 });
 
-// fetch new messages
+// Call and display the most recent messages when the page loads
 function fetch() {
 	console.log("fetch() was called");
 	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
@@ -100,20 +100,15 @@ function fetch() {
 		success: function(success) {
 			console.log("fetch() success");
 			
-			// loop through retrieved messages
-			for (i = 0; i < success.messages.length; i++ ) {
-				var newtime = success.messages[i].time;
-				var oldtime = msgs[msgs.length-1].time;
-				console.log(newtime);
-			
-				// check if the new message is newer than the last old message
-				if (newtime > oldtime) {
-					msgs.push(success.messages[i]);
+			for (i = 0; i < success.messages.length; i++ ) {	
+				//if the timestamp of the new message is greater than the previous timestamp, make time equal to the new value and prepend the string to the chatroom
+				if (success.messages[i].time > time) {
+					time = success.messages[i].time;
+					console.log(time);
+					console.log("successfully added " + i + " to msgs");
 					$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
-					// if a new message was added, let's keep the array small
-					msgs.shift();
 				}
-			}		
+			}
 		},
 		error: function() {
 			console.log("fetch() error");
@@ -121,29 +116,6 @@ function fetch() {
 	});
 }
 
-// Call and display the most recent messages when the page loads
-function firstfetch() {
-	console.log("fetch() was called");
-	$.ajax( "http://codeclasschat.herokuapp.com/messages", {
-		crossDomain: true,
-		dataType: "jsonp",
-		success: function(success) {
-			console.log("firstfetch() success");
-			var length = success.messages.length;
-
-			for (i = 0; i < success.messages.length; i++ ) {	
-				msgs.push(success.messages[i]);
-				console.log("successfully added " + i + " to msgs");
-				$('.messages').prepend('<li class="typewriter">' + success.messages[i].text + '</li>');
-			}
-		},
-		error: function() {
-			console.log("firstfetch() error");
-		}
-	});
-}
-
-window.onload = firstfetch;
 setInterval(fetch,1000);
 
 
